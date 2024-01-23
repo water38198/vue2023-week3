@@ -98,6 +98,30 @@ function confirmProduct() {
             })
     }
 }
+function deleteProduct(product) {
+    Swal.fire({
+        title: `你確定要刪除 ${product.title} 嗎?`,
+        showCancelButton: true,
+        confirmButtonText: "確定",
+        cancelButtonText: "取消"
+    }).then(result => {
+        if (result.isConfirmed) {
+            axios.delete(`${VITE_URL}/v2/api/${VITE_PATH}/admin/product/${product.id}`).then(res => {
+                getProducts();
+                Swal.fire(res.data.message);
+                Swal.fire({
+                    icon: "success",
+                    text: res.data.message
+                })
+            }).catch(err => {
+                Swal.fire({
+                    icon: "error",
+                    text: err.response.data.message
+                })
+            })
+        }
+    })
+}
 onMounted(() => {
     check();
 })
@@ -150,7 +174,8 @@ onMounted(() => {
                                 編輯
                             </button>
                             <button type="button"
-                                class="text-#dc3545 bg-transparent border-1 border-#de3545 border-solid rd-tr rd-br px-2 py-1 hover:(bg-#de3545 text-white cursor-pointer)">
+                                class="text-#dc3545 bg-transparent border-1 border-#de3545 border-solid rd-tr rd-br px-2 py-1 hover:(bg-#de3545 text-white cursor-pointer)"
+                                @click="deleteProduct(product)">
                                 刪除
                             </button>
                         </div>
