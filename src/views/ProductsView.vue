@@ -37,7 +37,6 @@ function getProducts() {
     axios.get(`${VITE_URL}/v2/api/${VITE_PATH}/admin/products/all`)
         .then(res => {
             products.value = res.data.products;
-            console.log(products.value)
         })
 }
 function autoClose(e) {
