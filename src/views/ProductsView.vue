@@ -88,7 +88,7 @@ function confirmProduct() {
             .then(res => {
                 Swal.fire({
                     title: `${res.data.message}`,
-                    icon: "success"
+                    icon: "success",
                 })
                 dialog.value.close();
                 temp.value = {};
