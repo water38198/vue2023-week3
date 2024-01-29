@@ -7,9 +7,9 @@ const { VITE_URL, VITE_PATH } = import.meta.env;
 const router = useRouter();
 const products = ref([]);
 const dialog = ref();
-const temp = ref({});
+const tempProduct = ref({});
 const isNew = ref(true);
-function check() {
+function checkAdmin() {
     // 取出 token
     const token = document.cookie
         .split("; ")
@@ -47,43 +47,43 @@ function autoClose(e) {
 }
 function addNewProduct() {
     dialog.value.showModal();
-    temp.value = {};
+    tempProduct.value = {};
     isNew.value = true
 }
 function editProduct(product) {
-    temp.value = JSON.parse(JSON.stringify(product));
+    tempProduct.value = JSON.parse(JSON.stringify(product));
     dialog.value.showModal();
     isNew.value = false
 }
 function addNewImages() {
     // 先檢查有無 imagesUrl屬性
-    if (!temp.value.imagesUrl) {
-        temp.value.imagesUrl = []
+    if (!tempProduct.value.imagesUrl) {
+        tempProduct.value.imagesUrl = []
     }
     // 如果最後一個為空則不能新增圖片
-    if (temp.value.imagesUrl[temp.value.imagesUrl.length - 1] === "") return
-    temp.value.imagesUrl.push("")
+    if (tempProduct.value.imagesUrl[tempProduct.value.imagesUrl.length - 1] === "") return
+    tempProduct.value.imagesUrl.push("")
 }
 function confirmProduct() {
     // 新增用 post ，修改用 put
     if (isNew.value) {
         axios.post(`${VITE_URL}/v2/api/${VITE_PATH}/admin/product`, {
-            data: temp.value
+            data: tempProduct.value
         }).then(res => {
             Swal.fire({
                 title: `${res.data.message}`,
                 icon: "success"
             })
             dialog.value.close();
-            temp.value = {};
+            tempProduct.value = {};
             getProducts();
         }).catch(err => {
             console.log(err)
         })
     } else {
-        const { id } = temp.value;
+        const { id } = tempProduct.value;
         axios.put(`${VITE_URL}/v2/api/${VITE_PATH}/admin/product/${id}`, {
-            data: temp.value
+            data: tempProduct.value
         })
             .then(res => {
                 Swal.fire({
@@ -91,7 +91,7 @@ function confirmProduct() {
                     icon: "success",
                 })
                 dialog.value.close();
-                temp.value = {};
+                tempProduct.value = {};
                 getProducts();
             }).catch(err => {
                 console.log(err)
@@ -123,7 +123,7 @@ function deleteProduct(product) {
     })
 }
 onMounted(() => {
-    check();
+    checkAdmin();
 })
 </script>
 <template>
@@ -196,21 +196,22 @@ onMounted(() => {
                 <div class="col-span-4">
                     <div class="input-group">
                         <label for="imagUrl" class="block">主要圖片</label>
-                        <input type="text" placeholder="請輸入圖片連結" v-model="temp.imageUrl" class="mb-2">
-                        <img :src="temp.imageUrl" alt="">
+                        <input type="text" placeholder="請輸入圖片連結" v-model="tempProduct.imageUrl" class="mb-2">
+                        <img :src="tempProduct.imageUrl" alt="">
                     </div>
                     <img src="" alt="">
                     <div>
                         <h4>多圖新增</h4>
-                        <div v-for='(image, index) in temp.imagesUrl' :key="image">
+                        <div v-for='(image, index) in tempProduct.imagesUrl' :key="image">
                             <div class="flex justify-between mb-2">
                                 <label for="images-1">圖片網址{{ index + 1 }}</label>
                                 <button
                                     class="i-ic:baseline-close font-size-5 opacity-50  hover:(cursor-pointer opacity-75)"
-                                    @click="temp.imagesUrl.splice(index, 1)"></button>
+                                    @click="tempProduct.imagesUrl.splice(index, 1)"></button>
                             </div>
                             <div class="input-group">
-                                <input type="text" v-model="temp.imagesUrl[index]" placeholder="請輸入圖片網址" class=",b-2">
+                                <input type="text" v-model="tempProduct.imagesUrl[index]" placeholder="請輸入圖片網址"
+                                    class=",b-2">
                             </div>
                             <img :src="image" alt="">
                         </div>
@@ -223,12 +224,12 @@ onMounted(() => {
                     <div class="grid grid-cols-2 gap-col-6 gap-row-4 ">
                         <div class="input-group  col-span-2">
                             <label for="title">標題</label>
-                            <input type="text" id="title" placeholder="請輸入標題" v-model="temp.title">
+                            <input type="text" id="title" placeholder="請輸入標題" v-model="tempProduct.title">
                         </div>
                         <div class="input-group">
                             <label for="category">分類</label>
                             <input type="text" id="category" placeholder="請輸入分類" list="categories" autocomplete="off"
-                                v-model="temp.category">
+                                v-model="tempProduct.category">
                             <datalist id="categories">
                                 <option value="策略">策略</option>
                                 <option value="派對">派對</option>
@@ -239,26 +240,27 @@ onMounted(() => {
                         </div>
                         <div class="input-group">
                             <label for="unit">單位</label>
-                            <input type="text" id="unit" placeholder="請輸入單位" v-model="temp.unit">
+                            <input type="text" id="unit" placeholder="請輸入單位" v-model="tempProduct.unit">
                         </div>
                         <div class="input-group">
                             <label for="origin_price">原價</label>
-                            <input type="number" id="origin_price" placeholder="請輸入原價" min="0" v-model="temp.origin_price">
+                            <input type="number" id="origin_price" placeholder="請輸入原價" min="0"
+                                v-model="tempProduct.origin_price">
                         </div>
                         <div class="input-group">
                             <label for="price">售價</label>
-                            <input type="number" id="price" placeholder="請輸入售價" min="0" v-model="temp.price">
+                            <input type="number" id="price" placeholder="請輸入售價" min="0" v-model="tempProduct.price">
                         </div>
                         <div class="input-group col-span-2">
                             <label for="description">產品敘述</label>
-                            <textarea name="" id="description" rows="4" v-model="temp.description"></textarea>
+                            <textarea name="" id="description" rows="4" v-model="tempProduct.description"></textarea>
                         </div>
                         <div class="input-group col-span-2">
                             <label for="content">說明內容</label>
-                            <textarea name="" id="content" rows="4" v-model="temp.content"></textarea>
+                            <textarea name="" id="content" rows="4" v-model="tempProduct.content"></textarea>
                         </div>
                         <div>
-                            <input type="checkbox" id="is_enabled" v-model="temp.is_enabled" :true-value="1"
+                            <input type="checkbox" id="is_enabled" v-model="tempProduct.is_enabled" :true-value="1"
                                 :false-value="0">
                             <label for="is_enabled">是否啟用</label>
                         </div>
